@@ -1,12 +1,22 @@
 package main
 
 import (
+	"embed"
 	"fmt"
+	"io/fs"
 	"log"
 	"net/http"
+	"os"
 	"text/template"
 	"time"
 )
+
+const prod = false
+
+//go:embed templates/*
+var buildFiles embed.FS
+
+var fileSys fs.FS
 
 type TutorialFilm struct {
 	Title    string
@@ -15,6 +25,16 @@ type TutorialFilm struct {
 
 func main() {
 	fmt.Println("starting service")
+	if prod {
+		fileSys = buildFiles
+	} else {
+		wd, err := os.Getwd()
+		if err != nil {
+			panic(err)
+		}
+		fileSys = os.DirFS(wd)
+	}
+
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /", tutorialTemplateRender)
@@ -28,7 +48,7 @@ func main() {
 }
 
 func tutorialTemplateRender(w http.ResponseWriter, r *http.Request) {
-	tmpl := template.Must(template.ParseFiles("templates/tutorial.html"))
+	tmpl := template.Must(template.ParseFS(fileSys, "templates/tutorial.html"))
 	films := map[string][]TutorialFilm{
 		"Films": {
 			{Title: "The Godfather", Director: "Francis Ford Coppola"},
@@ -43,7 +63,7 @@ func CreateAddfilm(w http.ResponseWriter, r *http.Request) {
 	time.Sleep(1 * time.Second)
 	title := r.PostFormValue("title")
 	director := r.PostFormValue("director")
-	tmpl := template.Must(template.ParseFiles("templates/tutorial.html"))
+	tmpl := template.Must(template.ParseFS(fileSys, "templates/tutorial.html"))
 	err := tmpl.ExecuteTemplate(w, "film-list-element", TutorialFilm{
 		Title:    title,
 		Director: director,
