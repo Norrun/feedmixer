@@ -129,7 +129,8 @@ func MustHandle(err error) MustHandleError {
 
 	result := &mustHandleError{inner: err}
 	runtime.SetFinalizer(result, func(mhe *mustHandleError) {
-		log.Println(mhe.ignored())
+
+		log.Println("error collected:", mhe.ignored())
 		mhe.Handle()
 
 	})

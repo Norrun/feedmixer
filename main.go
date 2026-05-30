@@ -9,6 +9,8 @@ import (
 	"os"
 	"text/template"
 	"time"
+
+	"github.com/Norrun/feedmixer/internal/must"
 )
 
 const prod = false
@@ -34,6 +36,9 @@ func main() {
 		}
 		fileSys = os.DirFS(wd)
 	}
+	must.StartPeriodicDump(30*time.Second, 10*time.Second)
+	defer log.Print(must.GetResidualErrorsError())
+	defer must.LogIgnoredErrorsOnPanic()
 
 	mux := http.NewServeMux()
 
