@@ -5,81 +5,92 @@ import (
 	"log"
 	"runtime"
 	"runtime/debug"
+	"sync"
 	"time"
 	"weak"
 )
 
 type wptErr = weak.Pointer[trackedError]
+type none struct{}
 
-// var registry map[weak.Pointer[trackedError]]errEntry
-var fastCh chan weak.Pointer[trackedError]
-var slowCh chan weak.Pointer[trackedError]
+type aSet struct {
+	m   map[wptErr]none
+	mux sync.RWMutex
+}
 
-func init() {
+var registry *aSet
+var errLifetime time.Duration = time.Second
 
-	fastCh = make(chan weak.Pointer[trackedError], 100)
-	slowCh = make(chan weak.Pointer[trackedError], 10)
-	Relay(fastCh, slowCh,
-		time.Second,
-		Filter(func(e wptErr) bool { return e.Value() != nil && false == e.Value().handled }),
-	)
-	startScanner()
+func (receiver *aSet) Delete(entry wptErr) {
+	receiver.mux.Lock()
+	delete(receiver.m, entry)
+	receiver.mux.Unlock()
+}
+
+func (receiver *aSet) ReadOne() (wptErr, bool) {
+	defer receiver.mux.RUnlock()
+	receiver.mux.RLock()
+	for we := range receiver.m {
+		return we, true
+	}
+
+	return wptErr{}, false
+}
+
+func (receiver *aSet) Write(ptr wptErr) {
+	receiver.mux.Lock()
+	receiver.m[ptr] = none{}
+	receiver.mux.Unlock()
+}
+
+func (receiver *aSet) ReadAll() []wptErr {
+	receiver.mux.RLock()
+	keys := make([]wptErr, 0, len(receiver.m))
+	for we := range receiver.m {
+		keys = append(keys, we)
+	}
+	receiver.mux.RUnlock()
+	return keys
 
 }
 
-func LogOnPanic() {
+func startTracker() *aSet {
+	return &aSet{
+		m:   make(map[wptErr]none),
+		mux: sync.RWMutex{},
+	}
+}
 
+func init() {
+	registry = startTracker()
+}
+
+func LogOnPanic() {
 	r := recover()
 	if r == nil {
 		return
 	}
 	debug.PrintStack()
 	printErrs()
-
+	panic(r)
 }
 
 func printErrs() {
-	for {
-		select {
-		case t := <-slowCh:
-			checkAndLog(t)
-			close(slowCh)
-		default:
-			select {
-			case t := <-fastCh:
-				checkAndLog(t)
-			default:
-				return
-			}
-
-		}
+	for _, v := range registry.ReadAll() {
+		checkAndLog(v)
 	}
 
 }
 
 func checkAndLog(err wptErr) {
-	if err.Value() != nil && false == err.Value().handled {
-		return
+	if v, ok := validate(err); ok {
+		log.Print(v.Unhandled())
 	}
-	log.Print(err.Value().Unhandled())
+
 }
 
-// Should be called once at the start of the program.
-func startScanner() {
-
-	go func() {
-
-		for v := range slowCh {
-			err := v.Value()
-			if err != nil {
-				continue
-			}
-			log.Println(err.Unhandled())
-			err.Handle()
-
-		}
-	}()
-
+func validate(err wptErr) (TrackedError, bool) {
+	return err.Value(), err.Value() != nil && false == err.Value().IsHandled()
 }
 
 type TrackedError interface {
@@ -87,13 +98,22 @@ type TrackedError interface {
 	Unwrap() error
 	Handle()
 	Unhandled() string
+	IsHandled() bool
 }
 
 type trackedError struct {
 	inner    error
 	handled  bool
+	mu       sync.RWMutex
 	callFile string
 	callLine int
+}
+
+// IsHandled implements [TrackedError].
+func (receiver *trackedError) IsHandled() bool {
+	receiver.mu.RLock()
+	defer receiver.mu.RUnlock()
+	return receiver.handled
 }
 
 // Unhandled implements [TrackedError].
@@ -112,6 +132,8 @@ func (receiver *trackedError) Unwrap() error {
 }
 
 func (receiver *trackedError) Handle() {
+	receiver.mu.Lock()
+	defer receiver.mu.Unlock()
 	receiver.handled = true
 }
 
@@ -123,18 +145,26 @@ func TrackErr(err error) TrackedError {
 	_, file, line, _ := runtime.Caller(2)
 
 	res := &trackedError{inner: err, callFile: file, callLine: line}
+	wptr := weak.Make(res)
 	runtime.SetFinalizer(res, func(e *trackedError) {
-		if e.handled {
+		defer registry.Delete(wptr)
+		if e.IsHandled() {
 			return
 		}
 		log.Println("in finelizer:", e.Unhandled())
 		e.Handle()
-	})
-	select {
-	case fastCh <- weak.Make(res):
 
-	default:
-		log.Print("Too many ingnored errors")
-	}
+	})
+
+	registry.Write(wptr)
+	go func() {
+		defer registry.Delete(wptr)
+		time.Sleep(errLifetime)
+		if v, ok := validate(wptr); ok {
+			log.Println(v.Unhandled())
+			v.Handle()
+		}
+	}()
+
 	return res
 }
