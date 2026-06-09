@@ -13,6 +13,10 @@ type ApproveResponseWriter struct {
 	predicate func(*ApproveResponseWriter) bool
 }
 
+func NewApprovalWriter(inner http.ResponseWriter, predicate func(*ApproveResponseWriter) bool) *ApproveResponseWriter {
+	return &ApproveResponseWriter{inner: inner, predicate: predicate}
+}
+
 func (receiver *ApproveResponseWriter) Header() http.Header {
 	return receiver.inner.Header()
 }
@@ -52,11 +56,19 @@ func (receiver *ApproveResponseWriter) Approve() {
 	if receiver.tmpBuff.Len() > 0 {
 		receiver.inner.Write(receiver.tmpBuff.Bytes())
 	}
-	if receiver.status > 0 {
+	if receiver.status > 99 {
 		receiver.WriteHeader(receiver.status)
 	}
 }
 
 func (receiver *ApproveResponseWriter) Approved() bool {
 	return receiver.approved
+}
+
+func (receiver *ApproveResponseWriter) Status() int {
+	return receiver.status
+}
+
+func (receiver *ApproveResponseWriter) ClearCache() {
+	receiver.tmpBuff.Reset()
 }

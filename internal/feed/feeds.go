@@ -5,12 +5,15 @@ import (
 	"github.com/mmcdole/gofeed"
 )
 
-//import "github.com/mmcdole/gofeed"
-
-func TestArea(url string) (*gofeed.Feed, error) {
+func TestArea(url string) (FeedExt, error) {
 	parser := gofeed.NewParser()
+	original, err := parser.ParseURL(url)
+	if err != nil {
+		return FeedExt{}, err
+	}
+	extended := FeedExt{original}
 
-	return parser.ParseURL(url)
+	return extended, nil
 
 }
 
@@ -19,9 +22,16 @@ type DisplayItem struct {
 	Description string
 	Url         string
 	Img         gofeed.Image
-	Authou      gofeed.Person
+	Author      gofeed.Person
 }
 
 type FeedHeader struct {
+	shouldhave.Unimplemented
+}
+
+type FeedExt struct {
+	*gofeed.Feed
+}
+type ItemExt struct {
 	shouldhave.Unimplemented
 }
