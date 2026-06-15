@@ -1,5 +1,6 @@
 package feedmixer
 
+// Need to be in root of project to function correctly
 import (
 	"embed"
 	"errors"

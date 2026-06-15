@@ -127,10 +127,14 @@ func MustHandle(err error) MustHandleError {
 		mhe.Handle()
 	}
 
+	_, file, line, _ := runtime.Caller(2)
+	log.Println(file, line)
+
 	result := &mustHandleError{inner: err}
 	runtime.SetFinalizer(result, func(mhe *mustHandleError) {
 
 		log.Println("error collected:", mhe.ignored())
+
 		mhe.Handle()
 
 	})
