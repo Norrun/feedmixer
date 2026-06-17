@@ -1,7 +1,6 @@
 package feed
 
 import (
-	"github.com/Norrun/feedmixer/internal/shouldhave"
 	"github.com/mmcdole/gofeed"
 )
 
@@ -26,12 +25,10 @@ type DisplayItem struct {
 }
 
 type FeedHeader struct {
-	shouldhave.Unimplemented
 }
 
 type FeedExt struct {
 	*gofeed.Feed
 }
 type ItemExt struct {
-	shouldhave.Unimplemented
 }
