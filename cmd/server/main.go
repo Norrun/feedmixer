@@ -49,7 +49,7 @@ func main() {
 
 	mux.Handle("GET /", injectCacheMiddleware(&cachMap, http.HandlerFunc(mainPageHandler)))
 
-	mux.Handle("POST /hx/search", injectCacheMiddleware(&cachMap, http.HandlerFunc(searchHandler)))
+	mux.Handle("GET /hx/search", injectCacheMiddleware(&cachMap, http.HandlerFunc(searchHandler)))
 
 	server := http.Server{
 		Addr:    ":8000",
@@ -128,7 +128,10 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 		aw.Approve()
 	}
 
-	_ = comp.Render(r.Context(), w)
+	err := comp.Render(r.Context(), w)
+	if err != nil {
+		log.Print(err)
+	}
 }
 
 func injectCacheMiddleware(cache *sync.Map, next http.Handler) http.Handler {

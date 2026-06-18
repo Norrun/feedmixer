@@ -11,6 +11,7 @@ templ Posts(feeditems []feed.DisplayItem) {
 				hx-get="/hx/search"
 				hx-trigger="keyup changed delay:1s"
 				hx-target="#feed-item-list"
+				hx-swap="outerHTML"
 			/>
 		</div>
 		@ListItems(feeditems)
