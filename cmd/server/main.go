@@ -1,15 +1,20 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"io/fs"
 	"log"
 	"net/http"
 	"os"
+	"strings"
+	"sync"
 
 	"github.com/Norrun/feedmixer/components"
+	"github.com/Norrun/feedmixer/internal/datautils"
 	feedui "github.com/Norrun/feedmixer/internal/feed"
+	"github.com/Norrun/feedmixer/internal/keyring"
 	"github.com/Norrun/feedmixer/internal/serverutils"
 	"github.com/Norrun/feedmixer/internal/wire"
 )
@@ -38,42 +43,19 @@ func main() {
 	//feedmixer.SetEnv(false)
 	//fileSys, _ = feedmixer.GetFileSys()
 
+	var cachMap sync.Map
+
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("GET /", mainPageHandler)
+	mux.Handle("GET /", injectCacheMiddleware(&cachMap, http.HandlerFunc(mainPageHandler)))
+
+	mux.Handle("POST /hx/search", injectCacheMiddleware(&cachMap, http.HandlerFunc(searchHandler)))
 
 	server := http.Server{
 		Addr:    ":8000",
 		Handler: RenderError(mux, nil),
 	}
 	server.ListenAndServe()
-}
-
-func RenderError(next http.Handler, renderer func(aw *wire.ApproveResponseWriter, r *http.Request)) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		aw := wire.NewApprovalWriter(w, func(arw *wire.ApproveResponseWriter) bool {
-			return arw.Status() < 400 && arw.Status() > 0
-		})
-		defer func() {
-			r := recover()
-			if r != nil {
-				log.Printf("panic occured in some handler: %v", r)
-				if aw.Approved() {
-					return
-				}
-				io.WriteString(w, "<p>500 Internal error</p>")
-				w.WriteHeader(500)
-			}
-		}()
-		next.ServeHTTP(aw, r)
-		if aw.Approved() {
-			return
-		}
-		if renderer != nil {
-			renderer(aw, r)
-		}
-
-	}
 }
 
 func mainPageHandler(w http.ResponseWriter, r *http.Request) {
@@ -95,10 +77,64 @@ func mainPageHandler(w http.ResponseWriter, r *http.Request) {
 			Description: v.Description,
 			Url:         v.Link})
 	}
-	comp := components.ListItems(items)
+	cacher := r.Context().Value(datautils.MakeTypedKey[*sync.Map](keyring.Cache))
+	if cacher != nil {
+		c, ok := cacher.(*sync.Map)
+		if !ok {
+			panic("missused type key")
+		}
+		c.Store(datautils.MakeTypedKey[[]feedui.DisplayItem](keyring.Cache), items)
+
+	}
+
+	comp := components.Posts(items)
 
 	if err := comp.Render(r.Context(), w); err != nil {
 		log.Print(err)
 	}
 
+}
+
+func searchHandler(w http.ResponseWriter, r *http.Request) {
+	query := strings.ToLower(r.URL.Query().Get("search"))
+	var results []feedui.DisplayItem
+	tKey := datautils.MakeTypedKey[*sync.Map](keyring.Cache)
+	that := r.Context().Value(tKey)
+	if that == nil {
+		//make some error responce
+		return
+	}
+	cache, ok := that.(*sync.Map)
+	if !ok {
+		panic("type key misuse")
+	}
+
+	that, ok = cache.Load(datautils.MakeTypedKey[[]feedui.DisplayItem](keyring.Cache))
+	if !ok {
+		//make some error responce
+		return
+	}
+	items, ok := that.([]feedui.DisplayItem)
+	if !ok {
+		panic("type key misuse")
+	}
+	for _, item := range items {
+		if strings.Contains(strings.ToLower(item.Title), query) {
+			results = append(results, item)
+		}
+	}
+	comp := components.ListItems(results)
+	if aw, ok := w.(*wire.ApproveResponseWriter); ok {
+		aw.Approve()
+	}
+
+	_ = comp.Render(r.Context(), w)
+}
+
+func injectCacheMiddleware(cache *sync.Map, next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.WithValue(r.Context(), datautils.MakeTypedKey[*sync.Map](keyring.Cache), cache)
+		nr := r.WithContext(ctx)
+		next.ServeHTTP(w, nr)
+	})
 }

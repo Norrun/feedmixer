@@ -1,6 +1,8 @@
 package datautils
 
-import "reflect"
+import (
+	"reflect"
+)
 
 func MakeTypedKey[T any, K comparable](key K) TypeKey[T, K] {
 	return TypeKey[T, K]{reflect.TypeFor[T](), key}

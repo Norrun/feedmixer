@@ -2,8 +2,23 @@ package components
 
 import "github.com/Norrun/feedmixer/internal/feed"
 
-templ ListItems(feeditems []feed.DisplayItem) {
+templ Posts(feeditems []feed.DisplayItem) {
 	@Base("MainList") {
+		<div class="search">
+			<input
+				type="search"
+				name="search"
+				hx-get="/hx/search"
+				hx-trigger="keyup changed delay:1s"
+				hx-target="#feed-item-list"
+			/>
+		</div>
+		@ListItems(feeditems)
+
+	}
+}
+
+templ ListItems(feeditems []feed.DisplayItem) {
 		<div id="feed-item-list" class="feed-item-list"> 
 		for _, item := range feeditems {
 			<div class="feed-item">
@@ -16,6 +31,6 @@ templ ListItems(feeditems []feed.DisplayItem) {
 		}// for loop
 		<!-- looks like it -->
 		</div>
-	}
+''
 	
 }
