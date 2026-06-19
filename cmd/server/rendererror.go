@@ -3,11 +3,12 @@ package main
 import (
 	"log"
 	"net/http"
+	"runtime/debug"
 
 	"github.com/Norrun/feedmixer/internal/wire"
 )
 
-func RenderError(next http.Handler, renderer func(aw *wire.ApproveResponseWriter, r *http.Request)) http.HandlerFunc {
+func RenderError(renderer func(aw *wire.ApproveResponseWriter, r *http.Request), next http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		aw := wire.NewApprovalWriter(w, func(arw *wire.ApproveResponseWriter) bool {
 			return arw.Status() < 400 && arw.Status() > 0
@@ -16,6 +17,7 @@ func RenderError(next http.Handler, renderer func(aw *wire.ApproveResponseWriter
 			rec := recover()
 			if rec != nil {
 				log.Printf("panic occured in some handler: %v", rec)
+				debug.PrintStack()
 				if aw.Approved() {
 					return
 				}
