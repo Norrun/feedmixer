@@ -1,5 +1,7 @@
 package keyring
 
+type keys int
+
 const (
-	Cache = "basic cache"
+	Cache keys = iota
 )
