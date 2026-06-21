@@ -15,7 +15,7 @@ import (
 	"github.com/Norrun/feedmixer/internal/wire"
 )
 
-type Handlers struct {
+type HandlersData struct {
 	state data.ServerState
 }
 

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 
 	"net/http"
 	"os"
@@ -19,7 +20,10 @@ func main() {
 	//feedmixer.SetEnv(false)
 	//fileSys, _ = feedmixer.GetFileSys()
 
-	state := data.Load()
+	state, err := data.Load(true)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	mux := routing(state)
 
