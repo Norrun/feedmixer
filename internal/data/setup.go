@@ -28,7 +28,7 @@ func Setup() (ServerState, error) {
 		return ServerState{}, fmt.Errorf("Interactive setup failed: %v", err)
 	}
 
-	if err := os.Mkdir(dir, os.ModeDir); err != nil {
+	if err := os.Mkdir(dir, os.ModePerm); err != nil {
 		return ServerState{}, fmt.Errorf("Error creating folder %s: %v", dir, err)
 	}
 
@@ -37,7 +37,7 @@ func Setup() (ServerState, error) {
 	if _, err := os.Create(dbp); err != nil {
 		return ServerState{}, fmt.Errorf("Error Creating %s: %v ", dbp, err)
 	}
-	db, err := sql.Open("sqlite3", dbp)
+	db, err := sql.Open("sqlite", dbp)
 	if err != nil {
 		return ServerState{}, fmt.Errorf("Error openine %s as database: %v", dbp, err)
 	}
@@ -99,7 +99,8 @@ func InteractiveSetup() (string, error) {
 func Update(db *sql.DB) (int, error) {
 	files := feedmixer.GetFileSys()
 	goose.SetBaseFS(files)
-	if err := goose.Up(db, "./"); err != nil {
+	goose.SetDialect("sqlite")
+	if err := goose.Up(db, "sql/schema"); err != nil {
 		return 0, fmt.Errorf("Failed to update database: %v", err)
 	}
 	v, err := goose.GetDBVersion(db)

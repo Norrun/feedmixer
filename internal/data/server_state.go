@@ -50,7 +50,7 @@ func Load(portable bool) (ServerState, error) {
 		return ServerState{}, fmt.Errorf("Failed to check setup state: %v ", errors.Join(errs...))
 	}
 
-	db, err := sql.Open("sqlite3", path.Join(dir, DbFileName))
+	db, err := sql.Open("sqlite", path.Join(dir, DbFileName))
 	if err != nil {
 		return ServerState{}, fmt.Errorf("Error opening db: %v", err)
 	}
