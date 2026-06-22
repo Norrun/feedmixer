@@ -3,6 +3,7 @@
 package data
 
 import (
+	"fmt"
 	"os"
 	"path"
 )
@@ -10,7 +11,7 @@ import (
 func systemPath() (string, error) {
 	home, err := os.UserConfigDir()
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("Error finding system path: %v", err)
 	}
 	dir := path.Join(home, systemSubDir)
 	return dir, nil

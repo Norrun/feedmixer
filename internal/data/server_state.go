@@ -3,9 +3,11 @@ package data
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"path"
 	"sync"
 
+	"github.com/Norrun/feedmixer/internal/database"
 	"github.com/Norrun/feedmixer/internal/datautils"
 )
 
@@ -13,7 +15,7 @@ type ServerState struct {
 	Data ServerData
 }
 
-type DBR = *sql.DB
+type DBR = *database.Queries
 
 type CacheKey int
 
@@ -29,13 +31,13 @@ type appInfo struct {
 
 type ServerData struct {
 	DB    DBR // Implemented later
-	Cache struct {
+	Cache *struct {
 		mu sync.RWMutex
 		m  map[datautils.KeyTo[any, CacheKey]]any
 	}
 }
 
-func Load(portable bool) (*ServerState, error) {
+func Load(portable bool) (ServerState, error) {
 	dir, errs, code := Scan()
 
 	switch code {
@@ -45,15 +47,15 @@ func Load(portable bool) (*ServerState, error) {
 		return Setup()
 
 	case 3:
-		return nil, errors.Join(errs...)
+		return ServerState{}, fmt.Errorf("Failed to check setup state: %v ", errors.Join(errs...))
 	}
 
 	db, err := sql.Open("sqlite3", path.Join(dir, DbFileName))
 	if err != nil {
-		return nil, err
+		return ServerState{}, fmt.Errorf("Error opening db: %v", err)
 	}
 
-	return NewServerState(db), nil
+	return NewServerState(database.New(db)), nil
 
 }
 
@@ -61,10 +63,10 @@ func CheckVersion(dir string) bool {
 	panic("unimplemented")
 }
 
-func NewServerState(db DBR) *ServerState {
-	return &ServerState{ServerData{
+func NewServerState(db DBR) ServerState {
+	return ServerState{ServerData{
 		DB: db,
-		Cache: struct {
+		Cache: &struct {
 			mu sync.RWMutex
 			m  map[datautils.KeyTo[any, CacheKey]]any
 		}{sync.RWMutex{},

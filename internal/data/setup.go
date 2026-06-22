@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/Norrun/feedmixer"
+	"github.com/Norrun/feedmixer/internal/database"
 	"github.com/Norrun/feedmixer/internal/serverutils"
 	"github.com/pressly/goose/v3"
 )
@@ -21,36 +22,36 @@ const (
 	AppInfoFileName = "appinfo.json"
 )
 
-func Setup() (*ServerState, error) {
+func Setup() (ServerState, error) {
 	dir, err := InteractiveSetup()
 	if err != nil {
-		return nil, err
+		return ServerState{}, fmt.Errorf("Interactive setup failed: %v", err)
 	}
 
 	if err := os.Mkdir(dir, os.ModeDir); err != nil {
-		return nil, err
+		return ServerState{}, fmt.Errorf("Error creating folder %s: %v", dir, err)
 	}
 
 	dbp := path.Join(dir, DbFileName)
 
 	if _, err := os.Create(dbp); err != nil {
-		return nil, err
+		return ServerState{}, fmt.Errorf("Error Creating %s: %v ", dbp, err)
 	}
 	db, err := sql.Open("sqlite3", dbp)
 	if err != nil {
-		return nil, err
+		return ServerState{}, fmt.Errorf("Error openine %s as database: %v", dbp, err)
 	}
 	ver, err := Update(db)
 	if err != nil {
-		return nil, err
+		return ServerState{}, fmt.Errorf("Error when updating database: %v", err)
 	}
 
 	err = setAppInfo(dir, ver)
 	if err != nil {
-		return nil, err
+		return ServerState{}, fmt.Errorf("Error when creating appInfo: %v", err)
 	}
 
-	return NewServerState(db), nil
+	return NewServerState(database.New(db)), nil
 
 }
 
@@ -64,17 +65,18 @@ func setAppInfo(dir string, dbv int) error {
 	}
 	data, err := json.Marshal(app)
 	if err != nil {
-		return err
+		return fmt.Errorf("Error encoding AppInfo: %v", err)
 	}
 
 	p := path.Join(dir, AppInfoFileName)
 	file, err := os.Create(p)
 	if err != nil {
-		return err
+		return fmt.Errorf("Error creating %s: %v", AppInfoFileName, err)
 	}
+	defer file.Close()
 	_, err = file.Write(data)
 	if err != nil {
-		return err
+		return fmt.Errorf("Error Writing to %s: %v", AppInfoFileName, err)
 	}
 	return nil
 }
@@ -98,11 +100,11 @@ func Update(db *sql.DB) (int, error) {
 	files := feedmixer.GetFileSys()
 	goose.SetBaseFS(files)
 	if err := goose.Up(db, "./"); err != nil {
-		return 0, err
+		return 0, fmt.Errorf("Failed to update database: %v", err)
 	}
 	v, err := goose.GetDBVersion(db)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("Database version unknown: %v", err)
 	}
 	return int(v), nil
 }
@@ -152,7 +154,7 @@ func Scan() (string, []error, uint8) {
 func portablePath() (string, error) {
 	dir, err := os.Executable()
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("Not Executable???: %v", err)
 	}
 	di, _ := path.Split(dir)
 
@@ -170,7 +172,7 @@ func Exists(file string) (string, bool, error) {
 		return "", false, nil
 
 	} else {
-		return file, false, err
+		return file, false, fmt.Errorf("Schrodinger's file: %s: %v", file, err)
 	}
 
 }
