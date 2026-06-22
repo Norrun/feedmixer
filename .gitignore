@@ -33,3 +33,5 @@ go.work.sum
 
 # generated
 *_templ.go
+internal/database/
+!internal/database/extra*
