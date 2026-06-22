@@ -1,6 +1,6 @@
 -- +goose Up
 CREATE TABLE feeds (
-    id INT PRIMARY KEY,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     created_at VARCHAR(30) NOT NULL,
     updated_at VARCHAR(30) NOT NULL,
     name TEXT NOT NULL,

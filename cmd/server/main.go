@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"log"
 
 	"net/http"
@@ -9,8 +10,10 @@ import (
 
 	"github.com/Norrun/feedmixer/internal/data"
 	feedui "github.com/Norrun/feedmixer/internal/feed"
+	"github.com/Norrun/feedmixer/internal/wire"
 
 	"github.com/Norrun/feedmixer/internal/serverutils"
+	_ "modernc.org/sqlite"
 )
 
 func main() {
@@ -28,18 +31,27 @@ func main() {
 	mux := routing(state)
 
 	server := http.Server{
-		Addr:    ":8000",
-		Handler: RenderError(nil, mux),
+		Addr: ":8000",
+		Handler: RenderError(func(aw *wire.ApproveResponseWriter, r *http.Request) {
+			status := aw.Status()
+			if 399 > status {
+				status = 500
+			}
+			aw.Approve()
+			io.WriteString(aw, fmt.Sprintf("<p>%d %s </p>", status, http.StatusText(status)))
+		}, mux),
 	}
 	server.ListenAndServe()
 }
 
-func routing(state *data.ServerState) *http.ServeMux {
+func routing(state data.ServerState) *http.ServeMux {
 	mux := http.NewServeMux()
+	handlers := StandardHandlers{ServerState: state}
 
-	mux.Handle("GET /", nil)
+	mux.HandleFunc("GET /", handlers.mainPageHandler)
 
-	mux.Handle("GET /hx/search", nil)
+	mux.HandleFunc("POST /hx/add-feed", handlers.hxAddFeed)
+	mux.HandleFunc("GET /hx/add-feed", handlers.hxEnableAddFeed)
 	return mux
 }
 

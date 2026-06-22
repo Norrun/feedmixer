@@ -9,14 +9,60 @@ import (
 
 	"github.com/Norrun/feedmixer/components"
 	"github.com/Norrun/feedmixer/internal/data"
+	"github.com/Norrun/feedmixer/internal/database"
 	"github.com/Norrun/feedmixer/internal/datautils"
 	feedui "github.com/Norrun/feedmixer/internal/feed"
 	"github.com/Norrun/feedmixer/internal/keyring"
 	"github.com/Norrun/feedmixer/internal/wire"
 )
 
-type HandlersData struct {
-	state data.ServerState
+type StandardHandlers struct {
+	ret *datautils.Pipe[func(aw *wire.ApproveResponseWriter, r *http.Request)]
+	data.ServerState
+}
+
+func (receiver StandardHandlers) mainPageHandler(w http.ResponseWriter, r *http.Request) {
+	home := components.HomePage()
+	wire.Approve(w)
+	if err := home.Render(r.Context(), w); err != nil {
+		log.Print(err)
+	}
+}
+
+func (receiver StandardHandlers) hxEnableAddFeed(w http.ResponseWriter, r *http.Request) {
+
+	form := components.AddingFeed()
+	button := components.AddFeedButton()
+	wire.Approve(w)
+	if r.URL.Query().Get("a") == "cancel" {
+		err := button.Render(r.Context(), w)
+		if err != nil {
+			log.Print(err)
+		}
+		return
+	}
+	err := form.Render(r.Context(), w)
+	if err != nil {
+		log.Print(err)
+	}
+
+}
+
+func (receiver StandardHandlers) hxAddFeed(w http.ResponseWriter, r *http.Request) {
+	button := components.AddFeedButton()
+
+	_, err := receiver.Data.DB.AddFeed(r.Context(), database.AddFeedParams{Name: r.URL.Query().Get("name"), Url: r.URL.Query().Get("url")})
+	if err != nil {
+		log.Print(err)
+		w.WriteHeader(500)
+		return
+	}
+	wire.Approve(w)
+	err = button.Render(r.Context(), w)
+	if err != nil {
+		log.Print(err)
+	}
+
 }
 
 //...
