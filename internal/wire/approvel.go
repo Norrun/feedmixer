@@ -41,8 +41,7 @@ func (receiver *ApproveResponseWriter) ApplyPredicate() {
 func (receiver *ApproveResponseWriter) WriteHeader(status int) {
 	defer receiver.ApplyPredicate()
 	if receiver.approved {
-		receiver.WriteHeader(status)
-		return
+		receiver.inner.WriteHeader(status)
 	}
 	receiver.status = status
 
@@ -71,4 +70,12 @@ func (receiver *ApproveResponseWriter) Status() int {
 
 func (receiver *ApproveResponseWriter) ClearCache() {
 	receiver.tmpBuff.Reset()
+}
+
+func Approve(w http.ResponseWriter) bool {
+	if aw, ok := w.(*ApproveResponseWriter); ok {
+		aw.Approve()
+		return true
+	}
+	return false
 }
