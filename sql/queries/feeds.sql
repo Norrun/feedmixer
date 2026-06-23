@@ -8,3 +8,11 @@ INSERT INTO feeds (
     ?
 )
 RETURNING *;
+
+-- name: GetFeedsByTag :many
+SELECT * FROM feeds
+WHERE id IN (
+    SELECT feed_id FROM tags_feeds
+    WHERE tag_id = ?
+);
+
