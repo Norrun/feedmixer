@@ -50,13 +50,20 @@ func (receiver StandardHandlers) hxEnableAddFeed(w http.ResponseWriter, r *http.
 
 func (receiver StandardHandlers) hxAddFeed(w http.ResponseWriter, r *http.Request) {
 	button := components.AddFeedButton()
-
-	_, err := receiver.Data.DB.AddFeed(r.Context(), database.AddFeedParams{Name: r.URL.Query().Get("name"), Url: r.URL.Query().Get("url")})
+	err := r.ParseForm()
 	if err != nil {
 		log.Print(err)
 		w.WriteHeader(500)
 		return
 	}
+
+	_, err = receiver.Data.DB.AddFeed(r.Context(), database.AddFeedParams{Name: r.FormValue("name"), Url: r.FormValue("url")})
+	if err != nil {
+		log.Print(err)
+		w.WriteHeader(500)
+		return
+	}
+	log.Print(r.FormValue("name"), r.FormValue("url"))
 	wire.Approve(w)
 	err = button.Render(r.Context(), w)
 	if err != nil {
