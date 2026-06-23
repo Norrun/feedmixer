@@ -17,15 +17,15 @@ templ AddFeedButton() {
     </div>
 }
 
-templ AddingFeed() {
+templ AddingFeed(name, url string) {
     <form hx-post="/hx/add-feed" hx-target="this" hx-swap="outerHTML">
   <div>
     <label>Name</label>
-    <input type="text" name="name" value="Joe Rogen">
+    <input type="text" name="name" value={name}>
   </div>
   <div class="form-group">
     <label>Feed url</label>
-    <input type="url" name="url" value="https://feeds.megaphone.fm/GLT1412515089">
+    <input type="url" name="url" value={templ.SafeURL(url)}>
   </div>
   <button class="btn" type="submit">Submit</button>
   <button class="btn" hx-get="/hx/add-feed?a=cancel">Cancel</button>

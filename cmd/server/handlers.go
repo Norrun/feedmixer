@@ -31,7 +31,7 @@ func (receiver StandardHandlers) mainPageHandler(w http.ResponseWriter, r *http.
 
 func (receiver StandardHandlers) hxEnableAddFeed(w http.ResponseWriter, r *http.Request) {
 
-	form := components.AddingFeed()
+	form := components.AddingFeed("Joe Rogen", "https://feeds.megaphone.fm/GLT1412515089")
 	button := components.AddFeedButton()
 	wire.Approve(w)
 	if r.URL.Query().Get("a") == "cancel" {
