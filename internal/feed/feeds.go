@@ -26,6 +26,10 @@ type DisplayItem struct {
 
 type FeedHeader struct {
 }
+type DisplayFeed struct {
+	Title string
+	Id    string // Pre-processed int
+}
 
 type FeedExt struct {
 	*gofeed.Feed

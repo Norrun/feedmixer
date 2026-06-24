@@ -5,10 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"path"
-	"sync"
 
 	"github.com/Norrun/feedmixer/internal/database"
-	"github.com/Norrun/feedmixer/internal/datautils"
 )
 
 type ServerState struct {
@@ -30,11 +28,7 @@ type appInfo struct {
 }
 
 type ServerData struct {
-	DB    DBR // Implemented later
-	Cache *struct {
-		mu sync.RWMutex
-		m  map[datautils.KeyTo[any, CacheKey]]any
-	}
+	DB DBR
 }
 
 func Load(portable bool) (ServerState, error) {
@@ -65,10 +59,6 @@ func CheckVersion(dir string) bool {
 
 func NewServerState(db DBR) ServerState {
 	return ServerState{ServerData{
-		DB: db,
-		Cache: &struct {
-			mu sync.RWMutex
-			m  map[datautils.KeyTo[any, CacheKey]]any
-		}{sync.RWMutex{},
-			map[datautils.KeyTo[any, CacheKey]]any{}}}}
+		DB: db},
+	}
 }
