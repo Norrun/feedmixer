@@ -6,27 +6,31 @@ import (
 )
 
 func MakeKeyTo[T any, K comparable](key K) KeyTo[T, K] {
-	return KeyTo[T, K]{KeyToThe[T](MakeKeyForThe[T]()), key}
+	return KeyTo[T, K]{KeyToThe[T](MakeKeyToThe[T]()), key}
 }
 
-func MakeKeyForThe[T any]() KeyToThe[T] {
-	return KeyToThe[T]{reflect.TypeFor[T]()}
+func MakeKeyToThe[T any]() KeyToThe[T] {
+	return KeyToThe[T]{}
+}
+
+type TypeKey interface {
+	Validate(any) bool
+}
+type TypeKeyValue[K comparable] interface {
+	TypeKey
+	Key() K
 }
 
 type KeyTo[T any, K comparable] struct {
 	KeyToThe[T]
-	Key K
+	key K
 }
 
-type KeyToSomething[K comparable] KeyTo[any, K]
-
-type KeyToThe[T any] struct {
-	valueType reflect.Type
+func (k KeyToThe[T]) Validate(v any) bool {
+	return reflect.TypeOf(v).AssignableTo(reflect.TypeFor[T]())
 }
 
-func (receiver KeyTo[T, K]) Unspecified() KeyToSomething[K] {
-	return KeyToSomething[K]{KeyToThe[any](receiver.KeyToThe), receiver.Key}
-}
+type KeyToThe[T any] struct{}
 
 type ReadableMap[K comparable, T any] interface {
 	map[KeyTo[T, K]]T | map[any]T | map[any]any | *sync.Map
