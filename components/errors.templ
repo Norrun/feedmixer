@@ -1,0 +1,26 @@
+package components
+
+templ ErrorWithComponent(message string, original templ.Component) {
+  if original != nil {
+    @original
+  }
+  <div>
+    <p>{message}</p>
+    <button onclick="this.parentElement.remove()">Ok</button>
+  </div>
+  
+}
+
+templ ErrorWithGet(message, url string) {
+  <div id="err-with-get">
+    <p>{message}</p>
+    <button hx-get={templ.SafeURL(url)} hx-target="#err-with-get" hx-swap="outerHTML" >Ok</button>
+  </div>
+}
+
+templ ErrorWithPost(message, url string) {
+  <div id="err-with-post">
+    <p>{message}</p>
+    <button hx-post={templ.SafeURL(url)} hx-target="#err-with-post" hx-swap="outerHTML" >Ok</button>
+  </div>
+}

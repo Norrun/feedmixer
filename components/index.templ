@@ -1,12 +1,40 @@
 package components
 
+import "github.com/Norrun/feedmixer/internal/feed"
+
 templ HomePage() {
     @Base("Feedmixer"){
         <div>
-            @AddFeedButton()
+          @Toolbar(nil)
+          <div>
+            <div>
+              @TagNav(nil)
+              @FeedNav(nil)
+            </div>
+            @PostFeed(nil)
+          </div>
         </div>
         
         }
+}
+
+templ Toolbar(contextTools  []templ.Component) {
+  <div class="toolbar">
+  @AddFeedButton()
+    for _, v := range(contextTools) {
+      @v
+    }
+  </div>
+}
+
+templ TagNav(tags []string) {
+  
+}
+templ FeedNav(feeds []feed.DisplayFeed) {
+  
+}
+templ PostFeed(posts []feed.DisplayItem) {
+  
 }
 
 templ AddFeedButton() {
@@ -16,6 +44,8 @@ templ AddFeedButton() {
         </button>
     </div>
 }
+
+
 
 templ AddingFeed(name, url string) {
     <form hx-post="/hx/add-feed" hx-target="this" hx-swap="outerHTML">
@@ -31,3 +61,4 @@ templ AddingFeed(name, url string) {
   <button class="btn" hx-get="/hx/add-feed?a=cancel">Cancel</button>
 </form>
 }
+

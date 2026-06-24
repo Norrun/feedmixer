@@ -17,8 +17,8 @@ import (
 )
 
 type StandardHandlers struct {
-	ret *datautils.Pipe[func(aw *wire.ApproveResponseWriter, r *http.Request)]
 	data.ServerState
+	Cache *datautils.SimpleCace
 }
 
 func (receiver StandardHandlers) mainPageHandler(w http.ResponseWriter, r *http.Request) {
@@ -59,8 +59,8 @@ func (receiver StandardHandlers) hxAddFeed(w http.ResponseWriter, r *http.Reques
 
 	_, err = receiver.Data.DB.AddFeed(r.Context(), database.AddFeedParams{Name: r.FormValue("name"), Url: r.FormValue("url")})
 	if err != nil {
-		log.Print(err)
-		w.WriteHeader(500)
+		form := components.AddingFeed(r.FormValue("name"), r.FormValue("url"))
+		components.ErrorWithComponent("someting went wrong when saving your submission, may already exist", form).Render(r.Context(), w)
 		return
 	}
 	log.Print(r.FormValue("name"), r.FormValue("url"))
