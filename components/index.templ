@@ -1,17 +1,18 @@
 package components
 
-import "github.com/Norrun/feedmixer/internal/feed"
 
-templ HomePage() {
+import "github.com/Norrun/feedmixer/internal/display"
+
+templ HomePage(data display.CentralData) {
     @Base("Feedmixer"){
         <div>
           @Toolbar(nil)
           <div>
             <div>
-              @TagNav(nil)
-              @FeedNav(nil)
+              @TagNav(data.Tags)
+              @FeedNav(data.Feeds)
             </div>
-            @PostFeed(nil)
+            @CentralView(data)
           </div>
         </div>
         
@@ -27,19 +28,25 @@ templ Toolbar(contextTools  []templ.Component) {
   </div>
 }
 
-templ TagNav(tags []string) {
+templ TagNav(tags []display.Tag) {
   
 }
-templ FeedNav(feeds []feed.DisplayFeed) {
+templ FeedNav(feeds []display.Feed) {
   
 }
-templ PostFeed(posts []feed.DisplayItem) {
+templ PostFeed(posts []display.Item) {
   
+}
+
+templ CentralView(data display.CentralData) {
+  <div id="central-view">
+    @PostFeed(data.Items)
+  </div>
 }
 
 templ AddFeedButton() {
     <div id="add-feed-area">
-         <button hx-get="/hx/add-feed" hx-target="#add-feed-area" hx-swap="outerHTML">
+         <button hx-get="/hx/add-feed" hx-target="#central-view" hx-swap="innerHTML">
             Add Feed
         </button>
     </div>
@@ -58,7 +65,7 @@ templ AddingFeed(name, url string) {
     <input type="url" name="url" value={templ.SafeURL(url)}>
   </div>
   <button class="btn" type="submit">Submit</button>
-  <button class="btn" hx-get="/hx/add-feed?a=cancel">Cancel</button>
+  <button class="btn" hx-get="/hx/central/back">Cancel</button>
 </form>
 }
 

@@ -1,8 +1,9 @@
 package components
 
-import "github.com/Norrun/feedmixer/internal/feed"
 
-templ Posts(feeditems []feed.DisplayItem) {
+import "github.com/Norrun/feedmixer/internal/display"
+
+templ Posts(feeditems []display.Item) {
 	@Base("MainList") {
 		<div class="search">
 			<input
@@ -19,7 +20,7 @@ templ Posts(feeditems []feed.DisplayItem) {
 	}
 }
 
-templ ListItems(feeditems []feed.DisplayItem) {
+templ ListItems(feeditems []display.Item) {
 		<div id="feed-item-list" class="feed-item-list"> 
 		for _, item := range feeditems {
 			<div class="feed-item">

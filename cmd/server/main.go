@@ -1,16 +1,14 @@
 package main
 
 import (
-	"fmt"
+	"io"
 	"log"
 
 	"net/http"
-	"os"
 
 	"github.com/Norrun/feedmixer/internal/data"
-	feedui "github.com/Norrun/feedmixer/internal/feed"
+	"github.com/Norrun/feedmixer/internal/wire"
 
-	"github.com/Norrun/feedmixer/internal/serverutils"
 	_ "modernc.org/sqlite"
 )
 
@@ -29,8 +27,10 @@ func main() {
 	mux := routing(state)
 
 	server := http.Server{
-		Addr:    ":8000",
-		Handler: mux,
+		Addr: ":8000",
+		Handler: RenderError(func(sw *wire.SnitchResponseWriter, r *http.Request) {
+			io.WriteString(sw, "500 internal error")
+		}, mux),
 	}
 	server.ListenAndServe()
 }
@@ -43,24 +43,7 @@ func routing(state data.ServerState) *http.ServeMux {
 
 	mux.HandleFunc("POST /hx/add-feed", handlers.hxAddFeed)
 	mux.HandleFunc("GET /hx/add-feed", handlers.hxEnableAddFeed)
+	mux.HandleFunc("GET /hx/central/{going}", handlers.hxCentralView)
+	mux.HandleFunc("GET /hx/get-items", handlers.hxCentralView)
 	return mux
-}
-
-func initialSetup() {
-	for {
-		var start bool
-		input := serverutils.GetInput()
-		switch input[0] {
-		case "feed":
-			f, err := feedui.TestArea(input[1])
-			fmt.Println(f, err)
-		case "next":
-			start = true
-		case "exit":
-			os.Exit(0)
-		}
-		if start {
-			break
-		}
-	}
 }

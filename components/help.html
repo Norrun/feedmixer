@@ -6,6 +6,42 @@
     <title>Document</title>
 </head>
 <body>
-    
+  <header>
+        <nav>
+            <ul>
+                <li><a href="#">Home</a></li>
+                <li><a href="#">About</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article>
+            <h1>Article Title</h1>
+            <p>Main content goes here.</p>
+            <aside>Related information</aside>
+        </article>
+    </main>
+    <footer>
+        <p>Copyright 2026</p>
+    </footer>
+
+
+    <div id="add-feed-area">
+         <button hx-get="/hx/add-feed" hx-swap="outerHTML">
+            Add Feed
+        </button>
+    </div>
+    <form hx-post="/hx/add-feed" hx-target="this" hx-swap="outerHTML">
+  <div>
+    <label>Name</label>
+    <input type="text" name="name" value="Joe Rogen">
+  </div>
+  <div class="form-group">
+    <label>Feed url</label>
+    <input type="url" name="url" value="https://feeds.megaphone.fm/GLT1412515089">
+  </div>
+  <button class="btn" type="submit">Submit</button>
+  <button class="btn" hx-get="/hx/add-feed?a=cancel">Cancel</button>
+</form>
 </body>
 </html>
