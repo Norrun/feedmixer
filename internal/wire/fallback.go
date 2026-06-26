@@ -108,10 +108,24 @@ func Fallback[T any](leafs ...func(int) (T, error)) (T, error) {
 	return empty, errl
 }
 
+func NewSnitchResponceWriter(w http.ResponseWriter) *SnitchResponseWriter {
+	return &SnitchResponseWriter{inner: w}
+}
+
 type SnitchResponseWriter struct {
 	inner  http.ResponseWriter
 	status int
 	hasBod bool
+}
+
+// Write implements [io.Writer].
+
+func (receiver SnitchResponseWriter) IsWritten() bool {
+	return receiver.hasBod
+}
+
+func (receiver SnitchResponseWriter) Status() int {
+	return receiver.status
 }
 
 func (receiver *SnitchResponseWriter) Header() http.Header {
