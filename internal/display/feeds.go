@@ -13,12 +13,15 @@ type Item struct {
 }
 
 type Feed struct {
-	Title string
-	Id    string // Pre-processed int
+	Title   string
+	Id      string // Pre-processed int
+	Checked bool
 }
 type Tag struct {
-	Text string
-	Id   string // Pre-processed int
+	Text    string
+	Id      string // Pre-processed int
+	Checked bool
+	Related []Tag
 }
 
 type CentralData struct {
