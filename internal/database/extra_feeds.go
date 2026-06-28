@@ -82,6 +82,9 @@ func tagTreeToAndPath(tree []display.Tag) [][]string {
 }
 
 func preProcessTagTreeRecur(node display.Tag, path []string, paths [][]string) [][]string {
+	if !node.Checked {
+		return paths
+	}
 	path = append(path, node.Id)
 	if len(node.Related) == 0 {
 		return append(paths, path)
