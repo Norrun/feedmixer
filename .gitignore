@@ -35,3 +35,6 @@ go.work.sum
 *_templ.go
 internal/database/*
 !internal/database/extra*
+
+# notes and shit
+components/help.html
