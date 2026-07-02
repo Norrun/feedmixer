@@ -24,7 +24,11 @@ HAVING COUNT(tag_id) = %d)`
 
 func (receiver *Queries) GetFeedsByTagTree(ctx context.Context, tree []display.Tag) ([]Feed, error) {
 	var builder strings.Builder
+	//correcting checkboxes, may change to do that earlier. Additionally need more advanced logic later to improve UX.
+	tree = ProcessTagCheckTree(tree)
+
 	// buildidng the query
+
 	protree := tagTreeToAndPath(tree)
 
 	for i, branch := range protree {
@@ -41,6 +45,7 @@ func (receiver *Queries) GetFeedsByTagTree(ctx context.Context, tree []display.T
 		}
 	}
 	query := fmt.Sprintf(getFeedAdv, builder.String())
+	fmt.Println(query)
 	// Calling the database
 	rows, err := receiver.db.QueryContext(ctx, query)
 	if err != nil {
@@ -71,6 +76,28 @@ func (receiver *Queries) GetFeedsByTagTree(ctx context.Context, tree []display.T
 	}
 	return items, nil
 
+}
+
+func ProcessTagCheckTree(tags []display.Tag) []display.Tag {
+	for i := range tags {
+		tags[i] = ProcessTagCheck(tags[i])
+	}
+	return tags
+}
+
+func ProcessTagCheck(tag display.Tag) display.Tag {
+	checked := tag.Checked
+
+	for i := range tag.Related {
+		subtag := ProcessTagCheck(tag.Related[i])
+		if subtag.Checked {
+			checked = true
+		}
+		tag.Related[i] = subtag
+
+	}
+	tag.Checked = checked
+	return tag
 }
 
 func tagTreeToAndPath(tree []display.Tag) [][]string {
