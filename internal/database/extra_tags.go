@@ -4,9 +4,11 @@ import (
 	"context"
 	"fmt"
 	"slices"
+	"strconv"
 	"strings"
 
 	"github.com/Norrun/feedmixer/internal/datautils"
+	"github.com/Norrun/feedmixer/internal/display"
 )
 
 const getTagsRelatedTags = `SELECT t.id, t.name
@@ -56,6 +58,52 @@ func (receiver *Queries) GetTagsRelatedTags(ctx context.Context, tag_ids []int) 
 		tags = append(tags, tag)
 	}
 	return tags, nil
+}
+
+func (receiver *Queries) GetTagForest(ctx context.Context) ([]display.Tag, error) {
+	dbtags, err := receiver.GetAllTags(ctx)
+	if err != nil {
+		return nil, err
+	}
+	/*
+		tagsNfeeds, err := receiver.GetTagAndFeedIds(ctx)
+		if err != nil {
+			return nil, err
+		}
+		tagToFeeds, FeedToTags := make(map[int64][]int64, 0), make(map[int64][]int64, 0)
+
+		for _, v := range tagsNfeeds {
+			feeds := tagToFeeds[v.TagID]
+			feeds = append(feeds, v.FeedID)
+			tagToFeeds[v.TagID] = feeds
+
+			tags := FeedToTags[v.FeedID]
+			tags = append(tags, v.TagID)
+			FeedToTags[v.FeedID] = tags
+		}*/
+	tags := make([]display.Tag, 0, len(dbtags))
+	for _, v := range dbtags {
+		tag, err := assembleTagTree(ctx, receiver, v, dbtags, []int64{v.ID})
+		if err != nil {
+			return nil, err
+		}
+		tags = append(tags, tag)
+	}
+	return tags, nil
+}
+
+func assembleTagTree(ctx context.Context, q *Queries, tag Tag, tags []Tag, path []int64) (display.Tag, error) {
+
+	relateddb, err := q.GetTagsRelatedTags(ctx, datautils.ConvertSlice(path, func(v int64) int { return int(v) }))
+	if err != nil {
+		return display.Tag{}, err
+	}
+	related, err := datautils.ConvertSliceErr(relateddb, func(t Tag) (display.Tag, error) { return assembleTagTree(ctx, q, t, tags, append(path, t.ID)) })
+	if err != nil {
+		return display.Tag{}, err
+	}
+	return display.Tag{Text: tag.Name, Id: strconv.Itoa(int(tag.ID)), Related: related}, nil
+
 }
 
 /*

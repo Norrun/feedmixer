@@ -27,7 +27,8 @@ WHERE name = ?;
 SELECT * FROM tags
 WHERE id = ?;
 
-
+-- name: GetAllTags :many
+SELECT * FROM tags
 
 ---- name: AddTags :exec
 --INSERT INTO tags (created_at, updated_at, name)
