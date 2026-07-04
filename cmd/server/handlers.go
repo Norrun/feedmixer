@@ -51,7 +51,12 @@ func Back(comps []templ.Component) templ.Component {
 }
 
 func (receiver StandardHandlers) mainPageHandler(w http.ResponseWriter, r *http.Request) {
-	newVar := display.CentralData{}
+	tags, err := receiver.Data.DB.GetTagForest(r.Context())
+	if err != nil {
+		panic("deal with this later")
+	}
+
+	newVar := display.CentralData{Tags: tags}
 	home := components.HomePage(newVar)
 
 	if err := home.Render(r.Context(), w); err != nil {
