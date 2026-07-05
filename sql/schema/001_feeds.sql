@@ -9,7 +9,7 @@ CREATE TABLE feeds (
     last_fetched_at VARCHAR(30),
     last_checked_at VARCHAR(30)
 );
-CREATE TABLE posts (
+CREATE TABLE items (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     created_at VARCHAR(30) NOT NULL,
     updated_at VARCHAR(30) NOT NULL,
@@ -20,7 +20,8 @@ CREATE TABLE posts (
     published_at VARCHAR(30),
     feed_id INTEGER NOT NULL,
     constraint fk_feed_id 
-    foreign key (feed_id) REFERENCES feeds(id),
+    foreign key (feed_id) REFERENCES feeds(id)
+    On DELETE CASCADE,
     UNIQUE(external_id, feed_id)
 );
 CREATE TABLE tags (

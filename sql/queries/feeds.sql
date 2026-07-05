@@ -16,3 +16,6 @@ WHERE id IN (
     WHERE tag_id = ?
 );
 
+-- name: GetAllFeeds :many
+SELECT * FROM feeds;
+
