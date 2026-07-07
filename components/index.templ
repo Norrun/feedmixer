@@ -35,27 +35,45 @@ templ Toolbar(contextTools  []templ.Component) {
 templ TagNav(tags []display.Tag) {
   <div class="tag-nav">
     for _, v := range(tags) {
-      @Tag(v, "","")
+      @Tag(v,make([]int,0))
       }
   </div>
 }
 
-templ Tag(tag display.Tag, path , ids string) {
+templ Tag(tag display.Tag , ids []int) {
   <div>
+    
     <details>
       <summary>
-        <input type="checkbox" id={"c:" + ids + "-" + tag.Id} name={path + tag.Text} value="">
-        <label for={ids + "-" + tag.Id}>{tag.Text}</label><br>
+        
+    <p>{tag.Text}</p>
       </summary>
       for _, v := range(tag.Related) {
-      @Tag(v, path + tag.Text,ids + "-" + tag.Id)
+      @Tag(v,ids)
       }
     </details>
   </div>
 }
 
+templ YMNRadio(prefix string, ids []int) {
+  <div>
+      <input type="radio" id={display.HTMLID(prefix + "radio1", ids)} name={display.IDPathParam(ids)} value="-1" />
+      <label for={display.HTMLID(prefix + "radio1", ids)}>❌</label>
+
+      <input type="radio" id={display.HTMLID(prefix + "radio2", ids)} name={display.IDPathParam(ids)} value="0" />
+      <label for={display.HTMLID(prefix + "radio2", ids)}>❔</label>
+
+      <input type="radio" id={display.HTMLID(prefix + "radio3", ids)} name={display.IDPathParam(ids)} value="1" />
+      <label for={display.HTMLID(prefix + "radio3", ids)}>✔</label>
+    </div>
+}
+
 templ FeedNav(feeds []display.Feed) {
-  
+  <div>
+    for _,feed := range(feeds) {
+      @YMNRadio("feed", []int{feed.Id})
+    }
+  </div>
 }
 templ PostFeed(posts []display.Item) {
   

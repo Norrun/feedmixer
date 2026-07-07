@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/Norrun/feedmixer/internal/display"
@@ -34,7 +35,7 @@ func (receiver *Queries) GetFeedsByTagTree(ctx context.Context, tree []display.T
 	for i, branch := range protree {
 		builder.WriteString(andBranchStart)
 		for j, leaf := range branch {
-			builder.WriteString(leaf)
+			builder.WriteString(strconv.Itoa(leaf))
 			if j < len(branch)-1 {
 				builder.WriteString(and)
 			}
@@ -100,15 +101,15 @@ func ProcessTagCheck(tag display.Tag) display.Tag {
 	return tag
 }
 
-func tagTreeToAndPath(tree []display.Tag) [][]string {
-	res := make([][]string, 0, len(tree))
+func tagTreeToAndPath(tree []display.Tag) [][]int {
+	res := make([][]int, 0, len(tree))
 	for _, v := range tree {
-		res = preProcessTagTreeRecur(v, make([]string, 0), res)
+		res = preProcessTagTreeRecur(v, make([]int, 0), res)
 	}
 	return res
 }
 
-func preProcessTagTreeRecur(node display.Tag, path []string, paths [][]string) [][]string {
+func preProcessTagTreeRecur(node display.Tag, path []int, paths [][]int) [][]int {
 	if !node.Checked {
 		return paths
 	}

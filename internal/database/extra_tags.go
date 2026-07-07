@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"slices"
-	"strconv"
 	"strings"
 
 	"github.com/Norrun/feedmixer/internal/datautils"
@@ -102,7 +101,7 @@ func assembleTagTree(ctx context.Context, q *Queries, tag Tag, tags []Tag, path 
 	if err != nil {
 		return display.Tag{}, err
 	}
-	return display.Tag{Text: tag.Name, Id: strconv.Itoa(int(tag.ID)), Related: related}, nil
+	return display.Tag{Text: tag.Name, Id: int(tag.ID), Related: related}, nil
 
 }
 

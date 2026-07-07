@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/Norrun/feedmixer/components"
@@ -60,7 +59,7 @@ func (receiver StandardHandlers) mainPageHandler(w http.ResponseWriter, r *http.
 	if err != nil {
 		panic("deal with this later")
 	}
-	feeds := datautils.ConvertSlice(dbfeeds, func(f database.Feed) display.Feed { return display.Feed{Title: f.Name, Id: strconv.Itoa(int(f.ID))} })
+	feeds := datautils.ConvertSlice(dbfeeds, func(f database.Feed) display.Feed { return display.Feed{Title: f.Name, Id: int(f.ID)} })
 	dbitems, err := receiver.Data.DB.GetAllItems(r.Context())
 	if err != nil {
 		panic("deal with this later")
