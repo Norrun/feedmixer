@@ -30,7 +30,5 @@ WHERE id = ?;
 -- name: GetAllTags :many
 SELECT * FROM tags
 
----- name: AddTags :exec
---INSERT INTO tags (created_at, updated_at, name)
---SELECT current_timestamp, current_timestamp, e.value) FROM json_each(sqlc.slice('name') AS e ;
+
 
