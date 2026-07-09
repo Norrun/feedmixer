@@ -81,7 +81,7 @@ func (receiver StandardHandlers) mainPageHandler(w http.ResponseWriter, r *http.
 
 func (receiver StandardHandlers) hxEnableAddFeed(w http.ResponseWriter, r *http.Request) {
 
-	form := components.AddingFeed("Joe Rogen", "https://feeds.megaphone.fm/GLT1412515089")
+	form := components.AddingFeed("Joe Rogen", "https://feeds.megaphone.fm/GLT1412515089", "podcast, poular")
 	button := components.AddFeedButton()
 
 	if r.URL.Query().Get("a") == "cancel" {
@@ -109,11 +109,11 @@ func (receiver StandardHandlers) hxAddFeed(w http.ResponseWriter, r *http.Reques
 
 	_, err = receiver.Data.DB.AddFeed(r.Context(), database.AddFeedParams{Name: r.FormValue("name"), Url: r.FormValue("url")})
 	if err != nil {
-		form := components.AddingFeed(r.FormValue("name"), r.FormValue("url"))
+		form := components.AddingFeed(r.FormValue("name"), r.FormValue("url"), r.FormValue("tags"))
 		components.ErrorWithComponent("someting went wrong when saving your submission, may already exist", form).Render(r.Context(), w)
 		return
 	}
-	log.Print(r.FormValue("name"), r.FormValue("url"))
+	log.Print(r.FormValue("name"), r.FormValue("url"), r.FormValue("tags"))
 
 	err = button.Render(r.Context(), w)
 	if err != nil {

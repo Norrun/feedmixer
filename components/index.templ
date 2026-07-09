@@ -95,7 +95,7 @@ templ AddFeedButton() {
 
 
 
-templ AddingFeed(name, url string) {
+templ AddingFeed(name, url string, tags string) {
     <form hx-post="/hx/add-feed" hx-target="this" hx-swap="outerHTML">
   <div>
     <label>Name</label>
@@ -104,6 +104,10 @@ templ AddingFeed(name, url string) {
   <div class="form-group">
     <label>Feed url</label>
     <input type="url" name="url" value={templ.SafeURL(url)}>
+  </div>
+  <div>
+    <label>Tags</label>
+    <input type="text" name="tags" value={tags}>
   </div>
   <button class="btn" type="submit">Submit</button>
   <button class="btn" hx-get="/hx/central/back">Cancel</button>
