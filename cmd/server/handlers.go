@@ -53,16 +53,16 @@ func Back(comps []templ.Component) templ.Component {
 func (receiver StandardHandlers) mainPageHandler(w http.ResponseWriter, r *http.Request) {
 	tags, err := receiver.Data.DB.GetTagForest(r.Context())
 	if err != nil {
-		panic("deal with this later")
+		log.Panic(err, "tag forest deal with this later")
 	}
 	dbfeeds, err := receiver.Data.DB.GetAllFeeds(r.Context())
 	if err != nil {
-		panic("deal with this later")
+		log.Panic(err, "all feeds deal with this later")
 	}
 	feeds := datautils.ConvertSlice(dbfeeds, func(f database.Feed) display.Feed { return display.Feed{Title: f.Name, Id: int(f.ID)} })
 	dbitems, err := receiver.Data.DB.GetAllItems(r.Context())
 	if err != nil {
-		panic("deal with this later")
+		log.Panic(err, "all items deal with this later")
 	}
 	items := datautils.ConvertSlice(dbitems, func(f database.Item) display.Item {
 		return display.Item{Title: f.Title, Url: f.Url, Description: f.Description.String}
@@ -107,13 +107,24 @@ func (receiver StandardHandlers) hxAddFeed(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	_, err = receiver.Data.DB.AddFeed(r.Context(), database.AddFeedParams{Name: r.FormValue("name"), Url: r.FormValue("url")})
+	feed, err := receiver.Data.DB.AddFeed(r.Context(), database.AddFeedParams{Name: r.FormValue("name"), Url: r.FormValue("url")})
 	if err != nil {
 		form := components.AddingFeed(r.FormValue("name"), r.FormValue("url"), r.FormValue("tags"))
 		components.ErrorWithComponent("someting went wrong when saving your submission, may already exist", form).Render(r.Context(), w)
 		return
 	}
 	log.Print(r.FormValue("name"), r.FormValue("url"), r.FormValue("tags"))
+	for _, v := range strings.Split(r.FormValue("tags"), ",") {
+		tag := strings.TrimSpace(v)
+		dbtag, err := receiver.Data.DB.AddTag(r.Context(), tag)
+		if err != nil {
+			panic("deal with it later")
+		}
+		_, err = receiver.Data.DB.AttachTag(r.Context(), database.AttachTagParams{FeedID: feed.ID, TagID: dbtag.ID})
+		if err != nil {
+			panic("deal with it later")
+		}
+	}
 
 	err = button.Render(r.Context(), w)
 	if err != nil {

@@ -10,7 +10,7 @@ import (
 	"github.com/Norrun/feedmixer/internal/display"
 )
 
-const getTagsRelatedTags = `SELECT t.id, t.name
+const getTagsRelatedTags = `SELECT *
 FROM tags t
 WHERE t.id IN (
     SELECT a.tag_id

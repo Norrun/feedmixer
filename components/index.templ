@@ -45,11 +45,11 @@ templ Tag(tag display.Tag , ids []int) {
     
     <details>
       <summary>
-        
+        @YMNRadio("tags",ids)
     <p>{tag.Text}</p>
       </summary>
       for _, v := range(tag.Related) {
-      @Tag(v,ids)
+      @Tag(v,append(ids,v.Id))
       }
     </details>
   </div>
