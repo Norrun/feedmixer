@@ -76,7 +76,18 @@ templ FeedNav(feeds []display.Feed) {
   </div>
 }
 templ PostFeed(posts []display.Item) {
-  
+  <div id="feed-item-list" class="feed-item-list"> 
+		for _, item := range posts {
+			<div class="feed-item">
+				<h2>{item.Title}</h2>
+				if item.Description != ""{
+				<p>{item.Description}</p>
+				}
+				<a href={templ.SafeURL(item.Url)}>{item.Url}</a>
+			</div>
+		}// for loop
+		<!-- looks like it -->
+		</div>
 }
 
 templ CentralView(data display.CentralData) {
