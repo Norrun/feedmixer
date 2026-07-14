@@ -7,6 +7,15 @@ import (
 	"github.com/mmcdole/gofeed"
 )
 
+type FilterValue int16
+
+const (
+	Undecided FilterValue = iota
+	Mixed
+	Excluded
+	Included
+)
+
 type Item struct {
 	Title       string
 	Description string
@@ -23,7 +32,7 @@ type Feed struct {
 type Tag struct {
 	Text    string
 	Id      int
-	State   bool
+	State   FilterValue
 	Related []Tag
 }
 
