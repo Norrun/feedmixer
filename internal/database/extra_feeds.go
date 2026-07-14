@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/Norrun/feedmixer/internal/datautils"
 	"github.com/Norrun/feedmixer/internal/display"
 )
 
@@ -14,7 +15,8 @@ WHERE %s;`
 
 const and = ", "
 const or = " OR "
-const param = "id IN %s"
+const include = " id IN "
+const exclude = " id NOT IN "
 
 const andBranchStart = `(SELECT feed_id
 FROM tags_feeds
@@ -33,14 +35,19 @@ func (receiver *Queries) GetFeedsByTagTree(ctx context.Context, tree []display.T
 	protree := tagTreeToAndPath(tree)
 
 	for i, branch := range protree {
+		if branch.V0 {
+			builder.WriteString(include)
+		} else {
+			builder.WriteString(exclude)
+		}
 		builder.WriteString(andBranchStart)
-		for j, leaf := range branch {
+		for j, leaf := range branch.V1 {
 			builder.WriteString(strconv.Itoa(leaf))
-			if j < len(branch)-1 {
+			if j < len(branch.V1)-1 {
 				builder.WriteString(and)
 			}
 		}
-		builder.WriteString(fmt.Sprintf(andBranchEnd, len(branch)))
+		builder.WriteString(fmt.Sprintf(andBranchEnd, len(branch.V1)))
 		if i < len(protree)-1 {
 			builder.WriteString(or)
 		}
@@ -87,35 +94,43 @@ func ProcessTagCheckTree(tags []display.Tag) []display.Tag {
 }
 
 func ProcessTagCheck(tag display.Tag) display.Tag {
-	checked := tag.Checked
+	checked := tag.State
 
 	for i := range tag.Related {
 		subtag := ProcessTagCheck(tag.Related[i])
-		if subtag.Checked {
-			checked = true
+		if checked == display.Undecided && checked != subtag.State {
+			if subtag.State == display.Mixed {
+				checked = display.Mixed
+			} else if checked == display.Excluded && subtag.State == display.Included {
+				checked = display.Mixed
+			}
 		}
 		tag.Related[i] = subtag
 
 	}
-	tag.Checked = checked
+	tag.State = checked
 	return tag
 }
 
-func tagTreeToAndPath(tree []display.Tag) [][]int {
-	res := make([][]int, 0, len(tree))
+func tagTreeToAndPath(tree []display.Tag) []datautils.Duo[bool, []int] {
+	res := make([]datautils.Duo[bool, []int], 0, len(tree))
 	for _, v := range tree {
 		res = preProcessTagTreeRecur(v, make([]int, 0), res)
 	}
 	return res
 }
 
-func preProcessTagTreeRecur(node display.Tag, path []int, paths [][]int) [][]int {
-	if !node.Checked {
+func preProcessTagTreeRecur(node display.Tag, path []int, paths []datautils.Duo[bool, []int]) []datautils.Duo[bool, []int] {
+	if node.State == display.Undecided {
 		return paths
 	}
+
 	path = append(path, node.Id)
 	if len(node.Related) == 0 {
-		return append(paths, path)
+		if node.State == display.Mixed {
+			panic("Invalid tag forest, mixed leaf")
+		}
+		return append(paths, datautils.NewDuo(node.State == display.Included, path))
 	}
 	for _, child := range node.Related {
 		paths = preProcessTagTreeRecur(child, path, paths)

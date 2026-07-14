@@ -23,7 +23,7 @@ type Feed struct {
 type Tag struct {
 	Text    string
 	Id      int
-	Checked bool
+	State   bool
 	Related []Tag
 }
 
