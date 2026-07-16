@@ -72,6 +72,7 @@ templ FeedNav(feeds []display.Feed) {
   <div>
     for _,feed := range(feeds) {
       @YMNRadio("feed", []int{feed.Id})
+      <p>{feed.Title}</p>
     }
   </div>
 }
