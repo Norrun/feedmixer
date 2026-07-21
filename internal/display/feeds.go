@@ -52,13 +52,12 @@ func HTMLID(ctxprefix string, ids []int) string {
 	return builder.String()
 }
 
-func IDPathParam(ids []int) string {
+func IDPathParam(kind string, ids []int) string {
 	var builder strings.Builder
-	for i, id := range ids {
-		if i > 0 {
-			builder.WriteRune('+')
+	builder.WriteString(kind)
+	for _, id := range ids {
+		builder.WriteRune('+')
 
-		}
 		builder.WriteString(strconv.Itoa(id))
 	}
 	return builder.String()

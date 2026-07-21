@@ -45,7 +45,7 @@ templ Tag(tag display.Tag , ids []int) {
     
     <details>
       <summary>
-        @YMNRadio("tags",ids)
+        @YMNRadio("tags",append(ids,tag.Id))
     <p>{tag.Text}</p>
       </summary>
       for _, v := range(tag.Related) {
@@ -55,16 +55,16 @@ templ Tag(tag display.Tag , ids []int) {
   </div>
 }
 
-templ YMNRadio(prefix string, ids []int) {
+templ YMNRadio(kind string, ids []int) {
   <div>
-      <input type="radio" id={display.HTMLID(prefix + "radio1", ids)} name={display.IDPathParam(ids)} value="-1" />
-      <label for={display.HTMLID(prefix + "radio1", ids)}>❌</label>
+      <input type="radio" id={display.HTMLID(kind + "radio1", ids)} name={display.IDPathParam(kind, ids)} value="-1" />
+      <label for={display.HTMLID(kind + "radio1", ids)}>❌</label>
 
-      <input type="radio" id={display.HTMLID(prefix + "radio2", ids)} name={display.IDPathParam(ids)} value="0" />
-      <label for={display.HTMLID(prefix + "radio2", ids)}>❔</label>
+      <input type="radio" id={display.HTMLID(kind + "radio2", ids)} name={display.IDPathParam(kind, ids)} value="0" />
+      <label for={display.HTMLID(kind + "radio2", ids)}>❔</label>
 
-      <input type="radio" id={display.HTMLID(prefix + "radio3", ids)} name={display.IDPathParam(ids)} value="1" />
-      <label for={display.HTMLID(prefix + "radio3", ids)}>✔</label>
+      <input type="radio" id={display.HTMLID(kind + "radio3", ids)} name={display.IDPathParam(kind, ids)} value="1" />
+      <label for={display.HTMLID(kind + "radio3", ids)}>✔</label>
     </div>
 }
 
