@@ -36,12 +36,27 @@ func CheckNil(v any) bool {
 	if v == nil {
 		return true
 	}
+
 	rv := reflect.ValueOf(v)
-	switch rv.Kind() {
-	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Chan, reflect.Func, reflect.Interface:
-		return rv.IsNil()
+
+	for {
+		switch rv.Kind() {
+		case reflect.Interface, reflect.Pointer:
+			if rv.IsNil() {
+				return true
+			}
+			rv = rv.Elem()
+
+		case reflect.Map,
+			reflect.Slice,
+			reflect.Chan,
+			reflect.Func:
+			return rv.IsNil()
+
+		default:
+			return false
+		}
 	}
-	return false
 }
 
 func CheckValidZero(v any) int {
