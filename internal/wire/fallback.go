@@ -144,10 +144,10 @@ func (receiver *SnitchResponseWriter) WriteHeader(status int) {
 
 func HandlerFallback(handlers ...http.HandlerFunc) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		aw := &ApproveResponseWriter{inner: w}
+		sw := NewSnitchResponceWriter(w)
 		for _, v := range handlers {
-			v(aw, r)
-			if aw.Approved() {
+			v(sw, r)
+			if sw.hasBod || sw.Status() >= 199 {
 				break
 			}
 		}

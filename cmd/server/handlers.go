@@ -10,7 +10,6 @@ import (
 	"github.com/Norrun/feedmixer/internal/database"
 	"github.com/Norrun/feedmixer/internal/datautils"
 	"github.com/Norrun/feedmixer/internal/display"
-	"github.com/Norrun/feedmixer/internal/wire"
 	"github.com/a-h/templ"
 )
 
@@ -138,9 +137,6 @@ func (receiver StandardHandlers) hxAddFeed(w http.ResponseWriter, r *http.Reques
 func mainPageHandler(w http.ResponseWriter, r *http.Request) {
 	const url = "https://www.youtube.com/feeds/videos.xml?channel_id=UCbRP3c757lWg9M-U7TyEkXA"
 	var items []display.Item
-	if aw, ok := w.(*wire.ApproveResponseWriter); ok {
-		aw.Approve()
-	}
 
 	comp := components.Posts(items)
 

@@ -42,18 +42,6 @@ type Trio[T0, T1, T2 any] struct {
 	V2 T2
 }
 
-// Should consider a purpos built struct by this point.
-type Quartet[T0, T1, T2, T3 any] struct {
-	Trio[T0, T1, T2]
-	V3 T3
-}
-
-// Should probably use a purpos built struct by this point.
-type Quintet[T0, T1, T2, T3, T4 any] struct {
-	Quartet[T0, T1, T2, T3]
-	V4 T4
-}
-
 func NewDuo[T0, T1 any](v0 T0, v1 T1) Duo[T0, T1] {
 	return Duo[T0, T1]{
 		V0: v0,
@@ -65,33 +53,6 @@ func NewTrio[T0, T1, T2 any](v0 T0, v1 T1, v2 T2) Trio[T0, T1, T2] {
 	return Trio[T0, T1, T2]{
 		Duo: NewDuo(v0, v1),
 		V2:  v2,
-	}
-}
-
-// Should consider a purpos built struct by this point.
-func NewQuartet[T0, T1, T2, T3 any](
-	v0 T0,
-	v1 T1,
-	v2 T2,
-	v3 T3,
-) Quartet[T0, T1, T2, T3] {
-	return Quartet[T0, T1, T2, T3]{
-		Trio: NewTrio(v0, v1, v2),
-		V3:   v3,
-	}
-}
-
-// Should probably use a purpos built struct by this point.
-func NewQuintet[T0, T1, T2, T3, T4 any](
-	v0 T0,
-	v1 T1,
-	v2 T2,
-	v3 T3,
-	v4 T4,
-) Quintet[T0, T1, T2, T3, T4] {
-	return Quintet[T0, T1, T2, T3, T4]{
-		Quartet: NewQuartet(v0, v1, v2, v3),
-		V4:      v4,
 	}
 }
 
