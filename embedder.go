@@ -5,9 +5,6 @@ import (
 	"io/fs"
 )
 
-var prod bool
-var envSet bool
-
 //go:embed sql/schema/*.sql
 var sqldata embed.FS
 
