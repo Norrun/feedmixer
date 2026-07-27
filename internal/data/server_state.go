@@ -31,7 +31,7 @@ type ServerData struct {
 	DB DBR
 }
 
-func Load(portable bool) (ServerState, error) {
+func LoadOrSetup(portable bool) (ServerState, error) {
 	dir, errs, code := Scan()
 
 	switch code {

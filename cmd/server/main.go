@@ -19,7 +19,7 @@ func main() {
 	//feedmixer.SetEnv(false)
 	//fileSys, _ = feedmixer.GetFileSys()
 
-	state, err := data.Load(true)
+	state, err := data.LoadOrSetup(true)
 	if err != nil {
 		log.Fatal(err)
 	}
