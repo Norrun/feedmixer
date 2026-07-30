@@ -1,13 +1,12 @@
 package utils
 
 import (
-	"runtime"
 	"sync"
 )
 
-func FanOut[TIn, TOut any](done <-chan struct{}, source <-chan TIn, load, perTheread int, process func(in TIn) TOut) []<-chan TOut {
+func FanOut[TIn, TOut any](done <-chan struct{}, source <-chan TIn, load, maxThread int, process func(in TIn) TOut) []<-chan TOut {
 
-	num := min(load, runtime.NumCPU()*perTheread)
+	num := min(load, maxThread)
 	res := make([]<-chan TOut, num)
 	for i := range num {
 		channel := make(chan TOut)
@@ -24,8 +23,8 @@ func FanOut[TIn, TOut any](done <-chan struct{}, source <-chan TIn, load, perThe
 	return res
 }
 
-func Fan[TIn, TOut any](done <-chan struct{}, load, perTheread int, process func(in TIn) TOut, sources ...<-chan TIn) []<-chan TOut {
-	return FanOut(done, FanIn(done, sources...), max(len(sources), load), perTheread, process)
+func Fan[TIn, TOut any](done <-chan struct{}, load, maxThread int, process func(in TIn) TOut, sources ...<-chan TIn) []<-chan TOut {
+	return FanOut(done, FanIn(done, sources...), max(len(sources), load), maxThread, process)
 }
 
 func FanIn[T any](done <-chan struct{}, sources ...<-chan T) <-chan T {
@@ -50,4 +49,14 @@ func FanIn[T any](done <-chan struct{}, sources ...<-chan T) <-chan T {
 		close(fannedIn)
 	}()
 	return fannedIn
+}
+
+func Unloader[T any](cap int, values ...T) <-chan T {
+	chanel := make(chan T, cap)
+	go func() {
+		for _, v := range values {
+			chanel <- v
+		}
+	}()
+	return chanel
 }
