@@ -23,7 +23,7 @@ const (
 )
 
 func Setup() (ServerState, error) {
-	dir, err := InteractiveSetup()
+	dir, err := InteractiveSetupConfig()
 	if err != nil {
 		return ServerState{}, fmt.Errorf("Interactive setup failed: %v", err)
 	}
@@ -81,7 +81,7 @@ func setAppInfo(dir string, dbv int) error {
 	return nil
 }
 
-func InteractiveSetup() (string, error) {
+func InteractiveSetupConfig() (string, error) {
 	for {
 		fmt.Println("Do you want portable setup? yes/no")
 		input := serverutils.GetInput()

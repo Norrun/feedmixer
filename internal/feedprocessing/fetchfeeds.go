@@ -1,7 +1,10 @@
 package feedprocessing
 
 import (
+	"context"
+	"database/sql"
 	"runtime"
+	"time"
 
 	"github.com/Norrun/feedmixer/internal/database"
 	"github.com/Norrun/feedmixer/internal/datautils"
@@ -9,9 +12,9 @@ import (
 	"github.com/mmcdole/gofeed"
 )
 
-func FetchFeeds(done <-chan struct{}, urls []database.Feed, db *database.Queries) {
+func FetchFeeds(done <-chan struct{}, feeds []database.Feed, db *database.Queries) {
 	threads := runtime.GOMAXPROCS(0)
-	chans := utils.FanOut(done, utils.Unloader(len(urls), urls...), len(urls), threads*4, func(s database.Feed) datautils.Result[*gofeed.Feed] {
+	chans := utils.FanOut(done, utils.Unloader(len(feeds), feeds...), len(feeds), threads*4, func(s database.Feed) datautils.Result[*gofeed.Feed] {
 		parser := gofeed.NewParser()
 		feed, err := parser.ParseURL(s.Url)
 		return datautils.NewResult(feed, err)
@@ -22,7 +25,17 @@ func FetchFeeds(done <-chan struct{}, urls []database.Feed, db *database.Queries
 		}
 		// add feed data
 		for _, v := range r.Value.Items {
-			//db.item
+			ctx, can := context.WithCancel(context.Background())
+			publishedNormalized := ""
+			if v.PublishedParsed != nil {
+				v.PublishedParsed.Format(time.RFC822)
+			}
+			db.AddItem(ctx, database.AddItemParams{
+				Title:       v.Title,
+				Url:         v.Link,
+				Description: sql.NullString{String: v.Description, Valid: v.Description != ""},
+				PublishedAt: v.PublishedParsed,
+			})
 		}
 	})
 
