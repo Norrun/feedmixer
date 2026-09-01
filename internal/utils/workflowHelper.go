@@ -60,3 +60,10 @@ func Unloader[T any](cap int, values ...T) <-chan T {
 	}()
 	return chanel
 }
+
+func ChainDoneContextCancel[T any](d <-chan T, c func()) {
+	go func() {
+		<-d
+		c()
+	}()
+}
