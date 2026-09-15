@@ -9,6 +9,10 @@ import (
 	"github.com/mmcdole/gofeed"
 )
 
+func FetchFeedsAndSave()  {
+	
+}
+
 func FetchFeeds(done <-chan struct{}, feeds []database.Feed) <-chan datautils.Result[*gofeed.Feed] {
 	threads := runtime.GOMAXPROCS(0)
 	//fetching feeds
