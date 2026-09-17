@@ -8,16 +8,21 @@ import (
 
 	"github.com/Norrun/feedmixer/internal/database"
 	"github.com/Norrun/feedmixer/internal/datautils"
+	"github.com/Norrun/feedmixer/internal/display"
 	"github.com/Norrun/feedmixer/internal/utils"
 	"github.com/mmcdole/gofeed"
 )
 
-func FetchFeedsAndSave(feeds []database.Feed, db *database.Queries) {
+func FetchFeedsAndSave(feeds []database.Feed, db *database.Queries) ([]display.Item, []struct {
+	ref int64
+	err error
+}) {
 
 	var errec []struct {
 		ref int64
 		err error
 	}
+	var items []display.Item
 	for _, dbf := range feeds {
 		parser := gofeed.NewParser()
 		feed, err := parser.ParseURL(dbf.Url)
@@ -42,9 +47,11 @@ func FetchFeedsAndSave(feeds []database.Feed, db *database.Queries) {
 				PublishedAt: sql.NullString{String: publishedNormalized, Valid: hasPublishTime},
 				FeedID:      dbf.ID,
 			})
+			items = append(items, display.Item{Title: v.Title, Description: v.Description, Url: v.Link, Img: *v.Image, Author: *v.Authors})
 
 		}
 	}
+	return items, errec
 }
 
 func FetchFeeds(done <-chan struct{}, feeds []database.Feed) <-chan datautils.Result[*gofeed.Feed] {
