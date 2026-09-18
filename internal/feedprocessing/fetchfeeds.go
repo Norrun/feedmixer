@@ -47,7 +47,7 @@ func FetchFeedsAndSave(feeds []database.Feed, db *database.Queries) ([]display.I
 				PublishedAt: sql.NullString{String: publishedNormalized, Valid: hasPublishTime},
 				FeedID:      dbf.ID,
 			})
-			items = append(items, display.Item{Title: v.Title, Description: v.Description, Url: v.Link, Img: *v.Image, Authors: *v.Authors})
+			items = append(items, display.Item{Title: v.Title, Description: v.Description, Url: v.Link, Img: *v.Image, Authors: v.Authors})
 
 		}
 	}
