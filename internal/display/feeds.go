@@ -21,7 +21,7 @@ type Item struct {
 	Description string
 	Url         string
 	Img         gofeed.Image
-	Author      gofeed.Person
+	Authors     []*gofeed.Person
 }
 
 type Feed struct {
