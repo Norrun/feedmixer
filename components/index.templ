@@ -76,6 +76,13 @@ templ FeedNav(feeds []display.Feed) {
     }
   </div>
 }
+
+templ FetchFeedButton() {
+  <button hx-get="hx/fetch-feed" hx-target="#central-view" hx-swap="innerHTML">
+  Fetch feeds
+  </button>
+}
+
 templ PostFeed(posts []display.Item) {
   <div id="feed-item-list" class="feed-item-list"> 
 		for _, item := range posts {
@@ -91,6 +98,8 @@ templ PostFeed(posts []display.Item) {
 		</div>
 }
 
+
+
 templ CentralView(data display.CentralData) {
   <div id="central-view">
     @PostFeed(data.Items)
@@ -104,6 +113,7 @@ templ AddFeedButton() {
         </button>
     </div>
 }
+
 
 
 
