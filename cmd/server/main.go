@@ -45,5 +45,6 @@ func routing(state data.ServerState) *http.ServeMux {
 	mux.HandleFunc("GET /hx/add-feed", handlers.hxEnableAddFeed)
 	mux.HandleFunc("GET /hx/central/{going}", handlers.hxCentralView)
 	mux.HandleFunc("GET /hx/get-items", handlers.hxCentralView)
+	mux.HandleFunc("GET /hx/fetch-feeds", handlers.hxFetchFeed)
 	return mux
 }

@@ -10,6 +10,7 @@ import (
 	"github.com/Norrun/feedmixer/internal/database"
 	"github.com/Norrun/feedmixer/internal/datautils"
 	"github.com/Norrun/feedmixer/internal/display"
+	"github.com/Norrun/feedmixer/internal/feedprocessing"
 	"github.com/a-h/templ"
 )
 
@@ -148,5 +149,14 @@ func mainPageHandler(w http.ResponseWriter, r *http.Request) {
 
 func searchHandler(w http.ResponseWriter, r *http.Request) {
 	_ = strings.ToLower(r.URL.Query().Get("search"))
+
+}
+
+func (receiver StandardHandlers) hxFetchFeed(w http.ResponseWriter, r *http.Request) {
+	feeds, _ := receiver.Data.DB.GetAllFeeds(r.Context())
+	items, _ := feedprocessing.FetchFeedsAndSave(feeds, receiver.Data.DB)
+
+	cmp := components.ListItems(items)
+	cmp.Render(r.Context(), w)
 
 }
