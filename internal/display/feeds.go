@@ -4,6 +4,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/a-h/templ"
 	"github.com/mmcdole/gofeed"
 )
 
@@ -20,7 +21,7 @@ type Item struct {
 	Title       string
 	Description string
 	Url         string
-	Img         gofeed.Image
+	Img         *gofeed.Image
 	Authors     []*gofeed.Person
 }
 
@@ -40,6 +41,7 @@ type CentralData struct {
 	Items []Item
 	Feeds []Feed
 	Tags  []Tag
+	Tools []templ.Component
 }
 
 func HTMLID(ctxprefix string, ids []int) string {

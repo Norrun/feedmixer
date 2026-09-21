@@ -68,7 +68,7 @@ func (receiver StandardHandlers) mainPageHandler(w http.ResponseWriter, r *http.
 		return display.Item{Title: f.Title, Url: f.Url, Description: f.Description.String}
 	})
 
-	newVar := display.CentralData{Tags: tags, Feeds: feeds, Items: items}
+	newVar := display.CentralData{Tags: tags, Feeds: feeds, Items: items, Tools: []templ.Component{components.FetchFeedButton()}}
 	home := components.HomePage(newVar)
 
 	if err := home.Render(r.Context(), w); err != nil {
@@ -153,8 +153,14 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (receiver StandardHandlers) hxFetchFeed(w http.ResponseWriter, r *http.Request) {
-	feeds, _ := receiver.Data.DB.GetAllFeeds(r.Context())
-	items, _ := feedprocessing.FetchFeedsAndSave(feeds, receiver.Data.DB)
+	feeds, err := receiver.Data.DB.GetAllFeeds(r.Context())
+	if err != nil {
+		panic("deal with it later")
+	}
+	items, errec := feedprocessing.FetchFeedsAndSave(feeds, receiver.Data.DB)
+	if len(errec) > 0 {
+		panic(errec)
+	}
 
 	cmp := components.ListItems(items)
 	cmp.Render(r.Context(), w)

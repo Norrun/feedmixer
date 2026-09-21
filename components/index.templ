@@ -6,7 +6,7 @@ import "github.com/Norrun/feedmixer/internal/display"
 templ HomePage(data display.CentralData) {
     @Base("Feedmixer"){
         <div>
-          @Toolbar(nil)
+          @Toolbar(data.Tools)
           @NavagableData(data)
         </div>
         
@@ -78,7 +78,7 @@ templ FeedNav(feeds []display.Feed) {
 }
 
 templ FetchFeedButton() {
-  <button hx-get="hx/fetch-feed" hx-target="#central-view" hx-swap="innerHTML">
+  <button hx-get="hx/fetch-feeds" hx-target="#central-view" hx-swap="innerHTML">
   Fetch feeds
   </button>
 }
