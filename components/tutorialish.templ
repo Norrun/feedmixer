@@ -15,24 +15,7 @@ templ Posts(feeditems []display.Item) {
 				hx-swap="outerHTML"
 			/>
 		</div>
-		@ListItems(feeditems)
+		//@ListItems(feeditems)
 
 	}
-}
-
-templ ListItems(feeditems []display.Item) {
-		<div id="feed-item-list" class="feed-item-list"> 
-		for _, item := range feeditems {
-			<div class="feed-item">
-				<h2>{item.Title}</h2>
-				if item.Description != ""{
-				<p>{item.Description}</p>
-				}
-				<a href={templ.SafeURL(item.Url)}>{item.Url}</a>
-			</div>
-		}// for loop
-		<!-- looks like it -->
-		</div>
-''
-	
 }

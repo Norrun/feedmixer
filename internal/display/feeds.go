@@ -20,7 +20,7 @@ const (
 type Item struct {
 	Title       string
 	Description string
-	Url         string
+	Urls        []string
 	Img         *gofeed.Image
 	Authors     []*gofeed.Person
 }

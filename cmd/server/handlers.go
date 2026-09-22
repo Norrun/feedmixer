@@ -65,7 +65,7 @@ func (receiver StandardHandlers) mainPageHandler(w http.ResponseWriter, r *http.
 		log.Panic(err, "all items deal with this later")
 	}
 	items := datautils.ConvertSlice(dbitems, func(f database.Item) display.Item {
-		return display.Item{Title: f.Title, Url: f.Url, Description: f.Description.String}
+		return display.Item{Title: f.Title, Urls: []string{f.Url}, Description: f.Description.String}
 	})
 
 	newVar := display.CentralData{Tags: tags, Feeds: feeds, Items: items, Tools: []templ.Component{components.FetchFeedButton()}}
@@ -162,7 +162,7 @@ func (receiver StandardHandlers) hxFetchFeed(w http.ResponseWriter, r *http.Requ
 		panic(errec)
 	}
 
-	cmp := components.ListItems(items)
+	cmp := components.PostFeed(items)
 	cmp.Render(r.Context(), w)
 
 }
