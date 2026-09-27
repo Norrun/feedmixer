@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -158,8 +159,8 @@ func (receiver StandardHandlers) hxFetchFeed(w http.ResponseWriter, r *http.Requ
 		panic("deal with it later")
 	}
 	items, errec := feedprocessing.FetchFeedsAndSave(feeds, receiver.Data.DB)
-	if len(errec) > 0 {
-		panic(errec)
+	for _, ed := range errec {
+		fmt.Printf("error for %d: %v", ed.Ref, ed.Err)
 	}
 
 	cmp := components.PostFeed(items)

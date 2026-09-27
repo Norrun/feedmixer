@@ -14,13 +14,13 @@ import (
 )
 
 func FetchFeedsAndSave(feeds []database.Feed, db *database.Queries) ([]display.Item, []struct {
-	ref int64
-	err error
+	Ref int64
+	Err error
 }) {
 
 	var errec []struct {
-		ref int64
-		err error
+		Ref int64
+		Err error
 	}
 	var items []display.Item
 	for _, dbf := range feeds {
@@ -28,8 +28,8 @@ func FetchFeedsAndSave(feeds []database.Feed, db *database.Queries) ([]display.I
 		feed, err := parser.ParseURL(dbf.Url)
 		if err != nil {
 			errec = append(errec, struct {
-				ref int64
-				err error
+				Ref int64
+				Err error
 			}{dbf.ID, err})
 		}
 		for _, v := range feed.Items {
