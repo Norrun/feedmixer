@@ -119,11 +119,11 @@ func (receiver StandardHandlers) hxAddFeed(w http.ResponseWriter, r *http.Reques
 		tag := strings.TrimSpace(v)
 		dbtag, err := receiver.Data.DB.AddTag(r.Context(), tag)
 		if err != nil {
-			panic("deal with it later")
+			panic(fmt.Sprintf("error adding tag in db: %v", err))
 		}
 		_, err = receiver.Data.DB.AttachTag(r.Context(), database.AttachTagParams{FeedID: feed.ID, TagID: dbtag.ID})
 		if err != nil {
-			panic("deal with it later")
+			panic(fmt.Sprintf("error attatching tag to feed db: %v", err))
 		}
 	}
 
@@ -156,7 +156,7 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 func (receiver StandardHandlers) hxFetchFeed(w http.ResponseWriter, r *http.Request) {
 	feeds, err := receiver.Data.DB.GetAllFeeds(r.Context())
 	if err != nil {
-		panic("deal with it later")
+		panic(fmt.Sprintf("problem getting all the feeds from DB: %v", err))
 	}
 	items, errec := feedprocessing.FetchFeedsAndSave(feeds, receiver.Data.DB)
 	for _, ed := range errec {
