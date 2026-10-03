@@ -40,14 +40,14 @@ func FetchFeedsAndSave(feeds []database.Feed, db *database.Queries) ([]display.I
 			if hasPublishTime {
 				publishedNormalized = v.PublishedParsed.Format(time.RFC3339)
 			}
-			url := ""
+			//url := ""
 			// Temporary fix
 			if len(v.Links) > 0 {
-				url = v.Links[0]
+				//url = v.Links[0]
 			}
 			db.AddItem(context.Background(), database.AddItemParams{
-				Title:       v.Title,
-				Url:         url,
+				Title: v.Title,
+
 				Description: sql.NullString{String: v.Description, Valid: v.Description != ""},
 				PublishedAt: sql.NullString{String: publishedNormalized, Valid: hasPublishTime},
 				FeedID:      dbf.ID,

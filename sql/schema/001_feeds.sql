@@ -15,14 +15,12 @@ CREATE TABLE items (
     updated_at VARCHAR(30) NOT NULL,
     external_id INTEGER NOT NULL,
     title TEXT NOT NULL,
-    url TEXT UNIQUE NOT NULL,
     description TEXT,
     published_at VARCHAR(30),
     feed_id INTEGER NOT NULL,
     constraint fk_feed_id 
     foreign key (feed_id) REFERENCES feeds(id)
-    On DELETE CASCADE,
-    UNIQUE(external_id, feed_id)
+    On DELETE CASCADE
 );
 CREATE TABLE tags (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
